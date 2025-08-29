@@ -9,37 +9,38 @@ import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
 
 /**
- * Car Brands Page (Admin Panel)
- * Shows: Logo, Name, Status (Active/Inactive)
- * Features: Add, Edit, Delete
+ * States Page (Admin Panel)
+ * Features: Add, Edit, Delete, Search, Filter
  */
-export default function CarBrandsPage() {
-  const [brands, setBrands] = useState([
-    { id: 1, name: "Toyota", status: "Active", logo: "https://1000logos.net/wp-content/uploads/2018/02/Toyota-Logo.png" },
-    { id: 2, name: "BMW", status: "Active", logo: "https://1000logos.net/wp-content/uploads/2018/02/BMW-Logo.png" },
-    { id: 3, name: "Mercedes-Benz", status: "Inactive", logo: "https://1000logos.net/wp-content/uploads/2018/02/Mercedes-Benz-Logo.png" },
-    { id: 4, name: "Tesla", status: "Active", logo: "https://1000logos.net/wp-content/uploads/2018/02/Tesla-Logo.png" },
-    { id: 5, name: "Hyundai", status: "Active", logo: "https://1000logos.net/wp-content/uploads/2018/02/Hyundai-logo.png" },
+export default function StatesPage() {
+  const statusOptions = [
+    { label: "Active", value: "Active" },
+    { label: "Inactive", value: "Inactive" },
+  ];
+
+  const [states, setStates] = useState([
+    { id: 1, name: "California", status: "Active" },
+    { id: 2, name: "Texas", status: "Active" },
+    { id: 3, name: "Florida", status: "Inactive" },
+    { id: 4, name: "Maharashtra", status: "Active" },
+    { id: 5, name: "Kerala", status: "Inactive" },
   ]);
 
   const [editVisible, setEditVisible] = useState(false);
   const [editing, setEditing] = useState(null);
 
   const [editName, setEditName] = useState("");
-  const [editStatus, setEditStatus] = useState("");
-  const [editLogo, setEditLogo] = useState("");
+  const [editStatus, setEditStatus] = useState("Active");
 
-  const statusOptions = [
-    { label: "Active", value: "Active" },
-    { label: "Inactive", value: "Inactive" },
-  ];
+  // Search & Filter
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState(null);
 
   // Open sidebar for Edit
   const openEdit = (row) => {
     setEditing(row);
     setEditName(row.name);
     setEditStatus(row.status);
-    setEditLogo(row.logo);
     setEditVisible(true);
   };
 
@@ -48,49 +49,39 @@ export default function CarBrandsPage() {
     setEditing(null);
     setEditName("");
     setEditStatus("Active");
-    setEditLogo("");
     setEditVisible(true);
   };
 
   // Save Edit or Add
   const saveEdit = () => {
     if (editing) {
-      // Update existing brand
-      setBrands((prev) =>
-        prev.map((b) =>
-          b.id === editing.id ? { ...b, name: editName, status: editStatus, logo: editLogo } : b
+      // Update existing state
+      setStates((prev) =>
+        prev.map((s) =>
+          s.id === editing.id ? { ...s, name: editName, status: editStatus } : s
         )
       );
     } else {
-      // Add new brand
-      const newBrand = {
-        id: brands.length + 1,
+      // Add new state
+      const newState = {
+        id: states.length + 1,
         name: editName,
         status: editStatus,
-        logo: editLogo || "https://via.placeholder.com/100x50.png?text=Logo",
       };
-      setBrands((prev) => [...prev, newBrand]);
+      setStates((prev) => [...prev, newState]);
     }
     setEditVisible(false);
     setEditing(null);
   };
 
-  // Delete brand
-  const removeBrand = (row) => {
-    if (confirm(`Delete ${row.name}?`)) {
-      setBrands((prev) => prev.filter((b) => b.id !== row.id));
+  // Delete state
+  const removeState = (row) => {
+    if (confirm(`Delete state ${row.name}?`)) {
+      setStates((prev) => prev.filter((s) => s.id !== row.id));
     }
   };
 
   // Table custom cells
-  const logoBody = (row) => (
-    <img
-      src={row.logo}
-      alt={row.name}
-      style={{ width: "50px", height: "50px", objectFit: "contain" }}
-    />
-  );
-
   const statusBody = (row) => (
     <Tag
       value={row.status}
@@ -117,32 +108,59 @@ export default function CarBrandsPage() {
         severity="danger"
         aria-label="Delete"
         className="p-button-sm"
-        onClick={() => removeBrand(row)}
+        onClick={() => removeState(row)}
       />
     </div>
   );
 
+  // Filtered Data
+  const filteredStates = states.filter((s) => {
+    const matchesSearch = s.name.toLowerCase().includes(globalFilter.toLowerCase());
+    const matchesStatus =
+      !statusFilter || s.status.toLowerCase() === statusFilter.toLowerCase();
+    return matchesSearch && matchesStatus;
+  });
+
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-semibold">Car Brands</h1>
-        <Button
-          label="Add Brand"
-          icon="pi pi-plus"
-          className="p-button-success"
-          onClick={openAdd}
-        />
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+        <h1 className="text-2xl font-semibold">States</h1>
+        <div className="flex gap-2">
+          <span className="p-input-icon-left">
+            <i className="pi pi-search" />
+            <InputText
+              value={globalFilter}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              placeholder="Search by state name..."
+            />
+          </span>
+          <Dropdown
+            value={statusFilter}
+            options={statusOptions}
+            onChange={(e) => setStatusFilter(e.value)}
+            placeholder="Filter by Status"
+            showClear
+          />
+          <Button
+            label="Add State"
+            icon="pi pi-plus"
+            className="p-button-success"
+            onClick={openAdd}
+          />
+        </div>
       </div>
 
+      {/* States Table */}
       <DataTable
-        value={brands}
+        value={filteredStates}
         paginator
         rows={5}
         className="rounded-2xl shadow-1"
         tableStyle={{ minWidth: "40rem" }}
+        emptyMessage="No states found."
       >
-        <Column header="Logo" body={logoBody} style={{ width: "100px" }} />
-        <Column field="name" header="Brand" sortable />
+        <Column field="name" header="State" sortable />
         <Column field="status" header="Status" body={statusBody} sortable />
         <Column header="Action" body={actionBody} style={{ width: "120px" }} />
       </DataTable>
@@ -153,7 +171,7 @@ export default function CarBrandsPage() {
         position="right"
         onHide={() => setEditVisible(false)}
       >
-        <h2 className="mb-4">{editing ? "Edit Brand" : "Add Brand"}</h2>
+        <h2 className="mb-4">{editing ? "Edit State" : "Add State"}</h2>
         <div className="p-fluid flex flex-col gap-3">
           <span className="p-float-label">
             <InputText
@@ -161,7 +179,7 @@ export default function CarBrandsPage() {
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
             />
-            <label htmlFor="edit-name">Name</label>
+            <label htmlFor="edit-name">State Name</label>
           </span>
 
           <span className="p-float-label">
@@ -175,15 +193,6 @@ export default function CarBrandsPage() {
             <label htmlFor="edit-status">Status</label>
           </span>
 
-          <span className="p-float-label">
-            <InputText
-              id="edit-logo"
-              value={editLogo}
-              onChange={(e) => setEditLogo(e.target.value)}
-            />
-            <label htmlFor="edit-logo">Logo URL</label>
-          </span>
-
           <div className="flex gap-2 mt-3">
             <Button
               label="Cancel"
@@ -191,7 +200,7 @@ export default function CarBrandsPage() {
               onClick={() => setEditVisible(false)}
             />
             <Button
-              label={editing ? "Save Changes" : "Add Brand"}
+              label={editing ? "Save Changes" : "Add State"}
               className="p-button-success"
               onClick={saveEdit}
             />
