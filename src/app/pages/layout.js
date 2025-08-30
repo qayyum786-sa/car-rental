@@ -8,6 +8,7 @@ import "primeflex/primeflex.css"; // primeflex
 import { Button } from "primereact/button";
 import { Menubar } from "primereact/menubar";
 import { BreadCrumb } from "primereact/breadcrumb";
+import Image from 'next/image';
 
 const Header = () => {
   const router = useRouter();
@@ -114,7 +115,7 @@ const Header = () => {
 
   const start = (
     <div className="flex align-items-center gap-4">
-      <img
+      <Image
         src="https://img.icons8.com/color/64/000000/car--v2.png"
         alt="Car Rental Logo"
         style={{ width: 48, height: 48 }}
