@@ -8,29 +8,64 @@ const prisma = new PrismaClient();
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { name, username, password, role_id } = body;
-        console.log(JSON.stringify(body));
+    const { name, username, password, role_id, is_active = true } = body;
+    console.log('Received data:', JSON.stringify(body));
+
+    // Validate required fields
+    if (!name || !username || !password || !role_id) {
+      return NextResponse.json({ 
+        error: 'Missing required fields',
+        message: 'Name, username, password, and role_id are required' 
+      }, { status: 400 });
+    }
+
+    // Validate role_id against enum values
+    const validRoles = ['ADMIN', 'MECHANIC', 'DRIVER', 'PROVIDER', 'CUSTOMER'];
+    if (!validRoles.includes(role_id)) {
+      return NextResponse.json({ 
+        error: 'Invalid role',
+        message: `Role must be one of: ${validRoles.join(', ')}` 
+      }, { status: 400 });
+    }
 
     // Hash password before storing
-    const hashedPassword = await bcrypt.hash(password, 5);
-    console.log(JSON.stringify(body));
+    const hashedPassword = await bcrypt.hash(password, 12);
+    
     const newUser = await prisma.users.create({
       data: {
         name,
         username,
-        passsword: hashedPassword,
-        role_id      }
+        password: hashedPassword,
+        role_id,
+        is_active
+      }
     });
     
     // Remove password from response
-    const { passsword, ...userResponse } = newUser;
-    return NextResponse.json(userResponse, { status: 201 });
+    const { password: _, ...userResponse } = newUser;
+    console.log('User created successfully:', userResponse);
+    
+    return NextResponse.json({
+      message: 'User created successfully',
+      user: userResponse
+    }, { status: 201 });
+    
   } catch (error) {
+    console.error('Error creating user:', error);
+    
     if (error.code === 'P2002') {
-      return NextResponse.json({ error: 'Username already exists' }, { status: 400 });
+      return NextResponse.json({ 
+        error: 'Username already exists',
+        message: 'A user with this username already exists'
+      }, { status: 409 });
     } else {
-      return NextResponse.json({ error: 'Failed to create user'+error.message }, { status: 500 });
+      return NextResponse.json({ 
+        error: 'Failed to create user',
+        message: error.message 
+      }, { status: 500 });
     }
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -47,10 +82,26 @@ export async function GET(request) {
     
     const whereClause = {};
     if (role_id) whereClause.role_id = role_id;
-    if (is_active !== null) whereClause.is_active = is_active === 'true';
+    if (is_active !== null && is_active !== undefined) {
+      whereClause.is_active = is_active === 'true';
+    }
     
-    const users = await prisma.users.findMany(
-      {
+    const users = await prisma.users.findMany({
+      where: whereClause,
+      skip: skip,
+      take: limit,
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        role_id: true,
+        is_active: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
     });
     
     const totalCount = await prisma.users.count({ where: whereClause });
@@ -66,6 +117,12 @@ export async function GET(request) {
       }
     });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
+    console.error('Error fetching users:', error);
+    return NextResponse.json({ 
+      error: 'Failed to fetch users',
+      message: error.message 
+    }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
