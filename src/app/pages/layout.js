@@ -56,7 +56,7 @@ const Header = () => {
         {
           label: "Checklist Category",
           icon: "pi pi-fw pi-check-square",
-          command: () => router.push("/pages/ChecklistCatogary"),
+          command: () => router.push("/pages/checklistcatogary"),
         },
         {
           label: "Checklist Items",
@@ -115,7 +115,7 @@ const Header = () => {
 
   const start = (
     <div className="flex align-items-center gap-4">
-      <Image
+      <img
         src="https://img.icons8.com/color/64/000000/car--v2.png"
         alt="Car Rental Logo"
         style={{ width: 48, height: 48 }}

@@ -4,12 +4,14 @@ import { Sidebar } from "primereact/sidebar";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
 
 function renderAction(role, user, onEdit) {
   if (role === "Admin") {
     return (
       <Button
-      label="Edit"
+        label="Edit"
         icon="pi pi-pencil"
         rounded
         text
@@ -22,7 +24,6 @@ function renderAction(role, user, onEdit) {
   }
   return null;
 }
-
 
 export default function UsersPage() {
   // ✅ keep users in state so we can add new ones
@@ -106,6 +107,11 @@ export default function UsersPage() {
   const cancelEdit = () => {
     setEditVisible(false);
     setEditingUser(null);
+  };
+
+  // Action column template for DataTable
+  const actionBodyTemplate = (rowData) => {
+    return renderAction(rowData.role, rowData, openEdit);
   };
 
   return (
@@ -215,40 +221,15 @@ export default function UsersPage() {
       </Sidebar>
 
       <h1>Users</h1>
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
-          <tr>
-            <th style={{ border: "1px solid #ddd", padding: "8px" }}>ID</th>
-            <th style={{ border: "1px solid #ddd", padding: "8px" }}>Name</th>
-            <th style={{ border: "1px solid #ddd", padding: "8px" }}>
-              Username
-            </th>
-            <th style={{ border: "1px solid #ddd", padding: "8px" }}>Role</th>
-            <th style={{ border: "1px solid #ddd", padding: "8px" }}>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user.id}>
-              <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                {user.id}
-              </td>
-              <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                {user.name}
-              </td>
-              <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                {user.username}
-              </td>
-              <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                {user.role}
-              </td>
-              <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                {renderAction(user.role, user, openEdit)}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      
+      {/* PrimeReact DataTable replacing the HTML table */}
+      <DataTable value={users} tableStyle={{ minWidth: '50rem' }}>
+        <Column field="id" header="ID"></Column>
+        <Column field="name" header="Name"></Column>
+        <Column field="username" header="Username"></Column>
+        <Column field="role" header="Role"></Column>
+        <Column header="Action" body={actionBodyTemplate}></Column>
+      </DataTable>
     </div>
   );
 }
