@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Sidebar } from "primereact/sidebar";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
@@ -8,7 +8,8 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 
 function renderAction(role, user, onEdit) {
-  if (role === "Admin") {
+  const normalized = (role || '').toString().toUpperCase();
+  if (normalized === 'ADMIN') {
     return (
       <Button
         label="Edit"
@@ -26,19 +27,15 @@ function renderAction(role, user, onEdit) {
 }
 
 export default function UsersPage() {
-  // ✅ keep users in state so we can add new ones
-  const [users, setUsers] = useState([
-    { id: 1, name: "John Doe", username: "johnny", role: "Customer" },
-    { id: 2, name: "Jane Smith", username: "janes", role: "Admin" },
-    { id: 3, name: "Mike Brown", username: "mikeb", role: "Customer" },
-    { id: 4, name: "Marry Hat", username: "marryh", role: "Admin" },
-  ]);
+  // ✅ users state
+  const [users, setUsers] = useState([]);
 
   const [visibleRight, setVisibleRight] = useState(false);
 
   // form states (Add User)
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [role, setRole] = useState(null);
 
   // edit states
@@ -49,32 +46,59 @@ export default function UsersPage() {
   const [editRole, setEditRole] = useState(null);
 
   const roleOptions = [
-    { label: "Mechanic", value: "Mechanic" },
-    { label: "Manager", value: "Manager" },
-    { label: "Admin", value: "Admin" },
-    { label: "Super Admin", value: "Super Admin" },
+    { label: "MECHANIC", value: "MECHANIC" },
+    { label: "DRIVER", value: "DRIVER" },
+    { label: "ADMIN", value: "ADMIN" },
+    { label: "PROVIDER", value: "PROVIDER" },
+    { label: "CUSTOMER", value: "CUSTOMER" },
   ];
 
-  const handleSubmit = () => {
-    if (!name || !email || !role) {
+  const handleSubmit = async () => {
+    if (!name || !username || !role || !password) {
       alert("Please fill all fields");
       return;
     }
 
-    const newUser = {
-      id: users.length + 1,
-      name,
-      username: email.split("@")[0], // auto-generate username from email
-      role,
-    };
+    try {
+      const res = await fetch("/api/v1/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          username,
+          password,
+          role_id: role,
+          is_active: true,
+        }),
+      });
 
-    setUsers([...users, newUser]);
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data?.message || "Failed to create user");
+        return;
+      }
 
-    // reset form + close sidebar
-    setName("");
-    setEmail("");
-    setRole(null);
-    setVisibleRight(false);
+      const created = data.user; // { id, name, username, role_id, ... }
+      setUsers((prev) => [
+        ...prev,
+        {
+          id: created.id,
+          name: created.name,
+          username: created.username,
+          role: created.role_id,
+        },
+      ]);
+
+      // reset form + close sidebar
+      setName("");
+      setUsername("");
+      setPassword("");
+      setRole(null);
+      setVisibleRight(false);
+    } catch (err) {
+      console.error(err);
+      alert("Network error while creating user");
+    }
   };
 
   const openEdit = (user) => {
@@ -109,6 +133,30 @@ export default function UsersPage() {
     setEditingUser(null);
   };
 
+  // Load users on mount from API
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const res = await fetch('/api/v1/users');
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.message || 'Failed to load users');
+        const rows = (data.users || []).map(u => ({
+          id: u.id,
+          name: u.name,
+          username: u.username,
+          role: u.role_id,
+        }));
+        setUsers(rows);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    loadUsers();
+  }, []);
+
+  // Index column template (S.No)
+  const indexBodyTemplate = (rowData, options) => options.rowIndex + 1;
+
   // Action column template for DataTable
   const actionBodyTemplate = (rowData) => {
     return renderAction(rowData.role, rowData, openEdit);
@@ -123,10 +171,12 @@ export default function UsersPage() {
         className="p-button-success"
         style={{
           position: "absolute",
-          top: "0rem",
+          top: "4px",
+          
           right: "2rem",
           fontWeight: "bold",
           fontSize: "16px",
+          borderRadius: "25px",
         }}
       />
 
@@ -150,11 +200,21 @@ export default function UsersPage() {
 
           <span className="p-float-label">
             <InputText
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
-            <label htmlFor="email">Email</label>
+            <label htmlFor="username">Username</label>
+          </span>
+
+          <span className="p-float-label">
+            <InputText
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <label htmlFor="password">Password</label>
           </span>
 
           <span className="p-float-label">
@@ -224,7 +284,7 @@ export default function UsersPage() {
       
       {/* PrimeReact DataTable replacing the HTML table */}
       <DataTable value={users} tableStyle={{ minWidth: '50rem' }}>
-        <Column field="id" header="ID"></Column>
+        <Column header="S.No" body={indexBodyTemplate} style={{ width: '6rem' }}></Column>
         <Column field="name" header="Name"></Column>
         <Column field="username" header="Username"></Column>
         <Column field="role" header="Role"></Column>
