@@ -125,6 +125,106 @@ exports.Prisma.UsersScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.BrandsScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  logo: 'logo',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ModelsScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  brandId: 'brandId',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.VariantScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  modelId: 'modelId',
+  fuelType: 'fuelType',
+  transmission: 'transmission',
+  seatingCapacity: 'seatingCapacity',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.StateScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  code: 'code',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CityScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  stateId: 'stateId',
+  pincode: 'pincode',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ChecklistCategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ChecklistItemScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  categoryId: 'categoryId',
+  description: 'description',
+  checkType: 'checkType',
+  required: 'required',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SettingScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  value: 'value',
+  category: 'category',
+  description: 'description',
+  dataType: 'dataType',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ProvidersScalarFieldEnum = {
+  id: 'id',
+  registration_status: 'registration_status',
+  name: 'name',
+  email: 'email',
+  mobile: 'mobile',
+  alternate_mobile: 'alternate_mobile',
+  address: 'address',
+  cityId: 'cityId',
+  stateId: 'stateId',
+  zipcode: 'zipcode',
+  mobileOTP: 'mobileOTP',
+  emailOTP: 'emailOTP',
+  is_active: 'is_active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -142,8 +242,23 @@ exports.role = exports.$Enums.role = {
   CUSTOMER: 'CUSTOMER'
 };
 
+exports.registration_status = exports.$Enums.registration_status = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+};
+
 exports.Prisma.ModelName = {
-  users: 'users'
+  users: 'users',
+  brands: 'brands',
+  models: 'models',
+  Variant: 'Variant',
+  State: 'State',
+  City: 'City',
+  ChecklistCategory: 'ChecklistCategory',
+  ChecklistItem: 'ChecklistItem',
+  Setting: 'Setting',
+  providers: 'providers'
 };
 
 /**

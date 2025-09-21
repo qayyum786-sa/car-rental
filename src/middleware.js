@@ -2,12 +2,15 @@
 import { NextResponse } from 'next/server';
 import { verifyToken } from './app/util/jwt-access';
 
-const PUBLIC_ROUTES = ['/login', '/api/v1/auth', '/api/v1/users'];
+const PUBLIC_ROUTES = ['/login', '/api/v1/auth', '/api/v1/users', '/api/v1/brands', '/api/v1/models', '/api/v1/variants', '/api/v1/states', '/api/v1/cities', '/api/v1/checklistcategories', '/api/v1/checklistitems'];
 
 export async function middleware(req) {
   const { pathname } = req.nextUrl;
 
-  if (PUBLIC_ROUTES.includes(pathname)) {
+  // Check if the route starts with any public route
+  const isPublic = PUBLIC_ROUTES.some(route => pathname.startsWith(route));
+  
+  if (isPublic) {
     return NextResponse.next();
   }
 

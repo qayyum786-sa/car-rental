@@ -69,19 +69,29 @@ export async function POST(request) {
   }
 }
 
-// READ - Get all users
+// READ - Get all users with support for multiple roles filtering
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page')) || 1;
     const limit = parseInt(searchParams.get('limit')) || 10;
-    const role_id = searchParams.get('role_id');
+    const role_id_param = searchParams.get('role_id');
     const is_active = searchParams.get('is_active');
     
     const skip = (page - 1) * limit;
     
     const whereClause = {};
-    if (role_id) whereClause.role_id = role_id;
+
+    // Support multiple roles filtering by parsing comma-separated list
+    if (role_id_param) {
+      const roles = role_id_param.split(',').map(r => r.trim()).filter(Boolean);
+      if (roles.length === 1) {
+        whereClause.role_id = roles[0];
+      } else if (roles.length > 1) {
+        whereClause.role_id = { in: roles };
+      }
+    }
+
     if (is_active !== null && is_active !== undefined) {
       whereClause.is_active = is_active === 'true';
     }
