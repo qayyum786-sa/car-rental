@@ -70,6 +70,8 @@ export async function POST(request) {
                                 }
                             })
                         ]);
+
+                        
                         const jwtSecret = process.env.JWT_SECRET || 'your-secret-key';
                         const tokenPayload = {
                             id: user.id,
@@ -83,7 +85,7 @@ export async function POST(request) {
                         // Prepare response (exclude sensitive data)
                         const { password: _, ...userResponse } = result.newUser;
 
-                       
+
 
                     }
                 }
@@ -94,10 +96,10 @@ export async function POST(request) {
 
             }
 
-             return NextResponse.json({
-                            message: 'Email OTP validated successfully and provider registered',
-                            data: token,
-                        }, { status: 200 });
+            return NextResponse.json({
+                message: 'Email OTP validated successfully and provider registered',
+                data: token,
+            }, { status: 200 });
         }
         else if (role_id === 'CUSTOMER') {
         }
