@@ -10,8 +10,7 @@ export async function POST(request) {
     const { 
       name, 
       email, 
-      mobile, 
-      
+      mobile,  
       alternate_mobile, 
       address, 
       cityId, 
@@ -29,17 +28,12 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    
-   
-
- 
-
     // Check if email already exists
-    const existingProviderByEmail = await prisma.providers.findUnique({
+    const existingProvider = await prisma.providers.findUnique({
       where: { email: email }
     });
 
-    if (existingProviderByEmail) {
+    if (existingProvider) {
       return NextResponse.json({ 
         statusCode: "409",
         message: "Email  already exists. Try with different email ",
@@ -48,11 +42,11 @@ export async function POST(request) {
     }
 
     // Check if mobile already exists
-    const existingProviderByMobile = await prisma.providers.findUnique({
-      where: { mobile: mobile }
+    const existingMobileUser = await prisma.providers.findUnique({
+      where: { mobile }
     });
 
-    if (existingProviderByMobile) {
+    if (existingMobileUser) {
       return NextResponse.json({ 
         statusCode: "409",
         message: "Email or Mobile already exists. Try with different email or mobile",
@@ -60,7 +54,11 @@ export async function POST(request) {
       }, { status: 409 });
     }
 
-    
+    const mobileOTP = Math.floor(100000 + Math.random() * 900000).toString();
+    const emailOTP = Math.floor(100000 + Math.random() * 900000).toString();
+
+
+
     
 
     
@@ -70,13 +68,15 @@ export async function POST(request) {
         name,
         email,
         mobile,
-        alternate_mobile,
-        password: '', // Placeholder for password hashing
+        alternate_mobile: alternate_mobile || '',
+        // password: '', // Placeholder for password hashing
         address,
-        cityId,
         stateId,
+        cityId,
         zipcode,
-        registration_status: "PENDING"
+        registration_status: "PENDING",
+        mobileOTP,
+        emailOTP
       }
     });
     

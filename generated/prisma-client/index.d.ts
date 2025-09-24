@@ -82,7 +82,8 @@ export type role = (typeof role)[keyof typeof role]
 export const registration_status: {
   PENDING: 'PENDING',
   APPROVED: 'APPROVED',
-  REJECTED: 'REJECTED'
+  REJECTED: 'REJECTED',
+  PENDING_APPROVAL: 'PENDING_APPROVAL'
 };
 
 export type registration_status = (typeof registration_status)[keyof typeof registration_status]
@@ -339,8 +340,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.15.0
-   * Query Engine version: 85179d7826409ee107a6ba334b5e305ae3fba9fb
+   * Prisma Client JS version: 6.16.2
+   * Query Engine version: 1c57fdcd7e44b29b9313256c76699e91c3ac3c43
    */
   export type PrismaVersion = {
     client: string

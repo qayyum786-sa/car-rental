@@ -124,6 +124,7 @@ enum registration_status {
   PENDING
   APPROVED
   REJECTED
+  PENDING_APPROVAL
 }
 
 model providers {
@@ -143,5 +144,5 @@ model providers {
   emailOTP            String
   is_active           Boolean             @default(true)
   createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
 }
